@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NUR 2034 Module Development Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF2F1;
+    --surface: #FFFFFF;
+    --ink: #17262A;
+    --ink-soft: #4E6165;
+    --line: #DAE3E1;
+    --teal: #1E6E68;
+    --teal-deep: #144C48;
+    --gold: #C08A34;
+    --gold-soft: #F3E4C9;
+    --done-bg: #1E6E68;
+    --pending-bg: #F4F6F5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:36px 20px 80px;
+  }
+  header.top{
+    margin-bottom:28px;
+  }
+  .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.04em;
+    color:var(--teal-deep);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(28px, 4vw, 40px);
+    line-height:1.1;
+    margin:0 0 6px;
+    color:var(--ink);
+  }
+  .subtitle{
+    font-size:15px;
+    color:var(--ink-soft);
+    margin:0 0 22px;
+    max-width:58ch;
+  }
+  .summary{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .summary-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .overall-num{
+    font-family:'Fraunces', serif;
+    font-size:34px;
+    font-weight:600;
+    color:var(--teal-deep);
+  }
+  .overall-label{
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .overall-bar{
+    height:8px;
+    background:var(--pending-bg);
+    border-radius:5px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .overall-bar .fill{
+    height:100%;
+    background:var(--teal);
+    transition:width .35s ease;
+  }
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+  }
+  .stat{
+    text-align:left;
+  }
+  .stat-label{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+    white-space:nowrap;
+  }
+  .stat-frac{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink);
+    margin-bottom:5px;
+  }
+  .stat-bar{
+    height:5px;
+    background:var(--pending-bg);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .stat-bar .fill{
+    height:100%;
+    background:var(--gold);
+    transition:width .35s ease;
+  }
+  .updated-line{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  .modules{
+    margin-top:30px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .module{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+  .module-head{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+  }
+  .module-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--teal-deep);
+    background:var(--gold-soft);
+    border-radius:5px;
+    padding:3px 7px;
+    margin-top:2px;
+    flex-shrink:0;
+  }
+  .module-title-wrap{
+    flex:1;
+    min-width:0;
+  }
+  .module-title-wrap h3{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:17px;
+    margin:0 0 8px;
+    line-height:1.3;
+  }
+  .module-progress-bar{
+    height:5px;
+    background:var(--pending-bg);
+    border-radius:4px;
+    overflow:hidden;
+    max-width:220px;
+  }
+  .module-progress-bar .fill{
+    height:100%;
+    background:var(--teal);
+    transition:width .3s ease;
+  }
+  .module-frac{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    flex-shrink:0;
+    margin-top:3px;
+  }
+  .module-frac.complete{
+    color:var(--teal-deep);
+    font-weight:600;
+  }
+  .items{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:14px;
+    padding-left:44px;
+  }
+  .chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    border:1px solid var(--line);
+    background:var(--pending-bg);
+    color:var(--ink-soft);
+    border-radius:20px;
+    padding:6px 12px 6px 8px;
+    font-size:13px;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+    user-select:none;
+  }
+  .chip:hover{
+    border-color:var(--teal);
+  }
+  .chip .mark{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    border:1.5px solid var(--ink-soft);
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10px;
+    color:transparent;
+  }
+  .chip.done{
+    background:var(--done-bg);
+    border-color:var(--done-bg);
+    color:#fff;
+  }
+  .chip.done .mark{
+    border-color:#fff;
+    background:#fff;
+    color:var(--done-bg);
+  }
+  footer.note{
+    margin-top:26px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.6;
+    max-width:60ch;
+  }
+  .load-msg{
+    font-size:13px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  @media (max-width:600px){
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .items{padding-left:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <p class="kicker">NUR 2034 · ADVANCED PHARMACOLOGY ACROSS THE LIFESPAN</p>
+    <h1>Module Development Tracker</h1>
+    <p class="subtitle">Live status of course build-out across all 14 content modules. Tap any item to mark it complete — updates save automatically for everyone viewing this page.</p>
+  </header>
+
+  <div class="summary" id="summary">
+    <div class="load-msg">Loading current status…</div>
+  </div>
+
+  <div class="modules" id="modules"></div>
+
+  <footer class="note">
+    Exam windows and ExamSoft build dates are tracked separately and are not tied to a specific module here, since exam timing is still being finalized. "Development Template" refers to the completed module planning template (objectives, readings, assessments).
+  </footer>
+
+</div>
+
+<script>
+const ITEM_DEFS = [
+  { key: 'template',   label: 'Dev. Template' },
+  { key: 'discussion', label: 'Discussion Prompt' },
+  { key: 'examsoft',   label: 'ExamSoft Bank' },
+  { key: 'ppt',        label: 'PowerPoint' },
+  { key: 'video',      label: 'Lecture Video' },
+];
+
+const MODULES = [
+  { num: 1,  title: 'Pharmacokinetics, Pharmacodynamics, and Pharmacogenomics' },
+  { num: 2,  title: 'CNS Pharmacology I (Psychiatric and Sleep Agents)' },
+  { num: 3,  title: 'CNS Pharmacology II (Opioids and Pain Management)' },
+  { num: 4,  title: 'CNS Pharmacology III (Neurology & Mood Agents)' },
+  { num: 5,  title: 'Pregnancy, Lactation, and Reproductive Pharmacology' },
+  { num: 6,  title: 'Cardiovascular Pharmacology I' },
+  { num: 7,  title: 'Cardiovascular Pharmacology II' },
+  { num: 8,  title: 'Pulmonary Pharmacology' },
+  { num: 9,  title: 'Inflammation and Immunosuppressive Pharmacology' },
+  { num: 10, title: 'Endocrine Pharmacology I: Diabetes' },
+  { num: 11, title: 'Endocrine Pharmacology II' },
+  { num: 12, title: 'Gastrointestinal Pharmacology' },
+  { num: 13, title: 'Anti-infective Pharmacology I' },
+  { num: 14, title: 'Anti-infective Pharmacology II' },
+];
+
+// Starting point reflecting current build status. Only used if no saved
+// data exists yet — after that, the saved data in storage is the source of truth.
+function defaultStatus(){
+  const base = () => ({ template:false, discussion:false, examsoft:false, ppt:false, video:false });
+  const s = {};
+  MODULES.forEach(m => s[m.num] = base());
+
+  // Modules 2 & 3: everything except lecture videos
+  [2,3].forEach(n => { s[n] = { template:true, discussion:true, examsoft:true, ppt:true, video:false }; });
+  // Modules 1 & 6: everything except lecture videos AND discussion prompt
+  [1,6].forEach(n => { s[n] = { template:true, discussion:false, examsoft:true, ppt:true, video:false }; });
+  // Modules 4, 5, 7, 8: development template only
+  [4,5,7,8].forEach(n => { s[n] = { template:true, discussion:false, examsoft:false, ppt:false, video:false }; });
+  // Modules 9-14: nothing started (already false by default)
+
+  return s;
+}
+
+// ── CONFIG ──────────────────────────────────────────────────────────────
+// Paste the /exec URL from your Apps Script deployment here:
+const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/pitt.edu/s/AKfycbwneUnSivIb2XKvqxodRfqx-go0cvcRXHnhTtQCa3xeHncFvms0YZhVdDJHk0-yj0PNwA/exec';
+// ────────────────────────────────────────────────────────────────────────
+
+let status = null;
+
+function pct(done, total){ return total === 0 ? 0 : Math.round((done/total)*100); }
+
+function setStatusLine(msg, isError){
+  const el = document.getElementById('updated-line');
+  if(el){
+    el.textContent = msg;
+    el.style.color = isError ? '#9A2E2E' : '';
+  }
+}
+
+function computeStats(){
+  let totalDone = 0;
+  const totalItems = MODULES.length * ITEM_DEFS.length;
+  const perItem = {};
+  ITEM_DEFS.forEach(it => perItem[it.key] = 0);
+
+  MODULES.forEach(m => {
+    const st = status[m.num];
+    ITEM_DEFS.forEach(it => {
+      if(st[it.key]){
+        totalDone++;
+        perItem[it.key]++;
+      }
+    });
+  });
+
+  return { totalDone, totalItems, perItem };
+}
+
+function renderSummary(){
+  const { totalDone, totalItems, perItem } = computeStats();
+  const overallPct = pct(totalDone, totalItems);
+
+  const statHtml = ITEM_DEFS.map(it => {
+    const done = perItem[it.key];
+    const p = pct(done, MODULES.length);
+    return `
+      <div class="stat">
+        <div class="stat-label">${it.label}</div>
+        <div class="stat-frac">${done} / ${MODULES.length}</div>
+        <div class="stat-bar"><div class="fill" style="width:${p}%"></div></div>
+      </div>`;
+  }).join('');
+
+  const now = new Date();
+  const stamp = now.toLocaleString(undefined, { dateStyle:'medium', timeStyle:'short' });
+
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-top">
+      <div>
+        <div class="overall-num">${overallPct}%</div>
+        <div class="overall-label">${totalDone} of ${totalItems} deliverables complete across 14 modules</div>
+      </div>
+    </div>
+    <div class="overall-bar"><div class="fill" style="width:${overallPct}%"></div></div>
+    <div class="stat-row">${statHtml}</div>
+    <div class="updated-line" id="updated-line">Last change saved ${stamp}</div>
+  `;
+}
+
+function renderModules(){
+  const container = document.getElementById('modules');
+  container.innerHTML = MODULES.map(m => {
+    const st = status[m.num];
+    const doneCount = ITEM_DEFS.filter(it => st[it.key]).length;
+    const p = pct(doneCount, ITEM_DEFS.length);
+    const fracClass = doneCount === ITEM_DEFS.length ? 'complete' : '';
+
+    const chips = ITEM_DEFS.map(it => {
+      const isDone = !!st[it.key];
+      return `
+        <button class="chip ${isDone ? 'done' : ''}" data-module="${m.num}" data-item="${it.key}">
+          <span class="mark">${isDone ? '✓' : ''}</span>${it.label}
+        </button>`;
+    }).join('');
+
+    return `
+      <div class="module">
+        <div class="module-head">
+          <span class="module-num">${String(m.num).padStart(2,'0')}</span>
+          <div class="module-title-wrap">
+            <h3>${m.title}</h3>
+            <div class="module-progress-bar"><div class="fill" style="width:${p}%"></div></div>
+          </div>
+          <span class="module-frac ${fracClass}">${doneCount}/${ITEM_DEFS.length}</span>
+        </div>
+        <div class="items">${chips}</div>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', onToggle);
+  });
+}
+
+async function onToggle(e){
+  const btn = e.currentTarget;
+  const moduleNum = btn.getAttribute('data-module');
+  const itemKey = btn.getAttribute('data-item');
+  const newValue = !status[moduleNum][itemKey];
+
+  // Optimistic update — reflect the change immediately, roll back on failure
+  status[moduleNum][itemKey] = newValue;
+  renderSummary();
+  renderModules();
+  setStatusLine('Saving…');
+
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      // text/plain avoids a CORS preflight that Apps Script doesn't handle;
+      // the body is still valid JSON and is parsed as JSON server-side.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ module: moduleNum, item: itemKey, value: newValue }),
+    });
+    const result = await res.json();
+    if(!result.success){
+      throw new Error(result.error || 'Unknown error');
+    }
+    const stamp = new Date().toLocaleString(undefined, { dateStyle:'medium', timeStyle:'short' });
+    setStatusLine(`Last change saved ${stamp}`, false);
+  }catch(err){
+    console.error('Failed to save status', err);
+    // Roll back the optimistic update since the save failed
+    status[moduleNum][itemKey] = !newValue;
+    renderSummary();
+    renderModules();
+    setStatusLine('Save failed — check your connection and try again', true);
+  }
+}
+
+async function init(){
+  if(APPS_SCRIPT_URL.indexOf('PASTE_YOUR') === 0){
+    document.getElementById('summary').innerHTML =
+      '<div class="load-msg" style="color:#9A2E2E;">Setup needed: paste your Apps Script deployment URL into the APPS_SCRIPT_URL constant near the top of this file\'s &lt;script&gt; tag.</div>';
+    return;
+  }
+
+  try{
+    const res = await fetch(APPS_SCRIPT_URL);
+    const sheetData = await res.json();
+
+    // Merge the sheet's status values into our known module list/order
+    status = {};
+    MODULES.forEach(m => {
+      const row = sheetData[m.num];
+      status[m.num] = row
+        ? { template: !!row.template, discussion: !!row.discussion, examsoft: !!row.examsoft, ppt: !!row.ppt, video: !!row.video }
+        : { template:false, discussion:false, examsoft:false, ppt:false, video:false };
+    });
+  }catch(err){
+    console.error('Failed to load status from Google Sheet', err);
+    status = defaultStatus();
+    renderSummary();
+    renderModules();
+    setStatusLine('Could not connect to the Google Sheet — showing default values. Check APPS_SCRIPT_URL and try reloading.', true);
+    return;
+  }
+
+  renderSummary();
+  renderModules();
+}
+
+init();
+</script>
+</body>
+</html>
